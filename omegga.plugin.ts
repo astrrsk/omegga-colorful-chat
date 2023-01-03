@@ -142,11 +142,21 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
 
     this.omegga.on('cmd:namecolors', (speaker: string) => {
       this.omegga.whisper(speaker, 'Current color roles:');
-      let output = '';
+      let output = [];
+      let current = '';
       this.roleNames.forEach((role, i) => {
-        output += i < this.roleNames.length - 1 ? `<color="${this.roleColors[role]}">${role}</>, ` : `<color="${this.roleColors[role]}">${role}</>`;
+        const formatted = `<color="${this.roleColors[role]}">${role}</>${i >= this.roleNames.length ? '' : ', '}`
+
+        if ((current + formatted).length > 512) {
+          output.push(current);
+          current = '';
+        }
+        current += formatted;
       });
-      this.omegga.whisper(speaker, output);
+      output.push(current);
+      output.forEach((s) => {
+        this.omegga.whisper(speaker, s);
+      })
     });
 
     return { registeredCommands: ['changecolor', 'namecolors'] };
