@@ -14,6 +14,11 @@ function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function toHex(v: number): string {
+  const hex = v.toString(16);
+  return hex.length == 1 ? '0' + hex : hex;
+}
+
 export default class Plugin implements OmeggaPlugin<Config, Storage> {
   omegga: OL;
   config: PC<Config>;
@@ -26,6 +31,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   }
 
   private roleNames = [];
+  private roleColors = {};
 
   async checkRoles(plr: OmeggaPlayer): Promise<string[]> {
     const playerRoles = plr.getRoles();
@@ -36,8 +42,6 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   }
 
   async init() {
-    //const FILE_PATH = __dirname + '/../roles.txt'
-
     if (!fs.existsSync(FILE_PATH)) {
       throw Error('Unable to find file "roles.txt" in plugin.');
     }
@@ -49,6 +53,29 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       return;
     }
 
+    const allRoles = this.omegga.getRoleSetup();
+
+    allRoles.roles.forEach((role) => {
+      const idx = this.roleNames.indexOf(role.name)
+
+      if (idx != -1) {
+        const R = role.color.r;
+        const G = role.color.g;
+        const B = role.color.b;
+
+        this.roleColors[role.name] = toHex(R) + toHex(G) + toHex(B);
+      }
+    });
+
+    const keys = Object.keys(this.roleColors)
+    if (keys.length != this.roleNames.length) {
+      const mismatch = this.roleNames.filter(v => !keys.includes(v));
+      console.error('Mismatch in server roles and roles in file.');
+      console.error(mismatch);
+      return;
+    }
+
+    // Join and leave methods
     this.omegga.on('join', async (player) => {
       // Delay is used to wait for the OmeggaPlayer with the proper methods needed to appear on the server
       setTimeout(async () => {
@@ -63,6 +90,11 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         }
       }, 500);
     });
+
+    this.omegga.on('leave', (player: OmeggaPlayer) => {
+      if (cooldowns.hasOwnProperty(player.name)) delete cooldowns[player.name]; // Just to be clean
+    });
+
 
     // Commands
     this.omegga.on('cmd:changecolor', async (speaker: string, toColor: string) => {
@@ -89,7 +121,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     this.omegga.on('cmd:namecolors', (speaker: string) => {
       this.omegga.whisper(speaker, 'Current color roles:');
       this.roleNames.forEach((role) => {
-        this.omegga.whisper(speaker, `- ${role}`);
+        this.omegga.whisper(speaker, `- <color="${this.roleColors[role]}">${role}</>`);
       });
     });
 
