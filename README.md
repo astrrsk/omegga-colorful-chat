@@ -1,29 +1,15 @@
-<!--
-
-When uploading your plugin to github/gitlab
-start your repo name with "omegga-"
-
-example: https://github.com/astrsk/omegga-colorful-chat
-
-Your plugin will be installed via omegga install gh:astrsk/colorful-chat
-
--->
-
 # colorful-chat
 
 A typed safe plugin for [omegga](https://github.com/brickadia-community/omegga).
 
-This is an auto-generated README file. Please change it before publishing your plugin!
-
-Be sure to edit the script in `setup.sh` to configure your plugin on install, or
-remove it entirely if it is unnecessary.
+Allows for cosmetic color roles created yourself to be auto-assigned and changable by the players of your server.
 
 ## Install
 
-`omegga install gh:astrsk/colorful-chat`
-
-_TODO: more steps...?_
+`omegga install gh:astrrsk/colorful-chat`
 
 ## Usage
 
-_TODO: include some usage information_
+Edit the file `roles.txt` with the roles you'd want to be pickable by the players. Instructions are on the first line.
+
+The config contains a command cooldown, allowing for you to change how long the delay inbetween color changes is. Accessable via the Web UI.
