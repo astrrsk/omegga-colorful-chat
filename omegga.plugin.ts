@@ -4,16 +4,19 @@ import fs from 'fs';
 type Config = { cooldown: number };
 type Storage = { bar: string };
 
+// Path for roles.txt
 const FILE_PATH = __dirname + '/../roles.txt';
 
 let cooldowns = {}
 
+// Gets a random int between min and max (inclusive)
 function getRandomInt(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+// Converts a number to hex
 function toHex(v: number): string {
   const hex = v.toString(16);
   return hex.length == 1 ? '0' + hex : hex;
@@ -33,6 +36,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   private roleNames = [];
   private roleColors = {};
 
+  // Check a player's roles to see if they already have a color
   async checkRoles(plr: OmeggaPlayer): Promise<string[]> {
     const playerRoles = plr.getRoles();
 
@@ -46,6 +50,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       throw Error('Unable to find file "roles.txt" in plugin.');
     }
 
+    // Read from roles.txt, split by newline and remove the first line
     this.roleNames = fs.readFileSync(FILE_PATH, 'utf-8').split('\n');
     this.roleNames.splice(0, 1);
     if (this.roleNames.length == 1 && this.roleNames[0] === '') {
@@ -55,6 +60,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
 
     const allRoles = this.omegga.getRoleSetup();
 
+    // Gets the colors of the roles in roles.txt
     allRoles.roles.forEach((role) => {
       const idx = this.roleNames.indexOf(role.name)
 
@@ -67,6 +73,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       }
     });
 
+    // Ensure roles.txt is accurate to the roles on the server
     const keys = Object.keys(this.roleColors)
     if (keys.length != this.roleNames.length) {
       const mismatch = this.roleNames.filter(v => !keys.includes(v));
@@ -74,6 +81,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       console.error(mismatch);
       return;
     }
+
 
     // Join and leave methods
     this.omegga.on('join', async (player) => {
