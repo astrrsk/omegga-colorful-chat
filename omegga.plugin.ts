@@ -59,6 +59,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     }
 
     const allRoles = this.omegga.getRoleSetup();
+    let nonColorRoles = [];
 
     // Gets the colors of the roles in roles.txt
     allRoles.roles.forEach((role) => {
@@ -70,7 +71,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         const B = role.color.b;
 
         this.roleColors[role.name] = toHex(R) + toHex(G) + toHex(B);
-      }
+      } else nonColorRoles[nonColorRoles.length] = role.name.toLowerCase();
     });
 
     // Ensure roles.txt is accurate to the roles on the server
@@ -90,7 +91,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         const plr = this.omegga.getPlayer(player.name)
         if ((await this.checkRoles(plr)).length <= 0) {
           this.omegga.whisper(plr, 'You have been assigned a random colored role!');
-          this.omegga.whisper(plr, 'Use <code>/namecolors</> to see the avalible colors, and <code>/chagecolor [color]</> to change it.');
+          this.omegga.whisper(plr, 'Use <code>/namecolors</> to see all available colors, and <code>/chagecolor [color]</> to change it.');
           const max = this.roleNames.length;
           const R = getRandomInt(0, max - 1);
 
@@ -107,12 +108,20 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     // Commands
     this.omegga.on('cmd:changecolor', async (speaker: string, toColor: string) => {
       if (cooldowns.hasOwnProperty(speaker) && (Date.now() - cooldowns[speaker]) < (this.config.cooldown * 1000)) {
-        this.omegga.whisper(speaker, 'You are on cooldown!');
+        const diff = (Date.now() - cooldowns[speaker]) / 1000;
+        const remaining = this.config.cooldown - Math.floor(diff);
+        const formatted = new Date(remaining * 1000).toISOString().slice(14, 19);
+        this.omegga.whisper(speaker, `You are on cooldown! <color="ffff00">${formatted}</> remaining.`);
+        return;
+      }
+
+      if (nonColorRoles.includes(toColor.toLowerCase())) {
+        this.omegga.whisper(speaker, '<color="ff0000">That role cannot be assigned. <emoji>contempt</>');
         return;
       }
 
       if (!this.roleNames.includes(toColor)) {
-        this.omegga.whisper(speaker, 'That role cannot be assigned.');
+        this.omegga.whisper(speaker, 'Cannot find that color. <color="edf263">Ensure it\'s spelt correctly, role names are case-sensitive</>!');
         return;
       }
 
@@ -126,9 +135,9 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         this.omegga.writeln(`Chat.Command /RevokeRole "${role}" "${plr.name}"`);
       });
 
-      this.omegga.whisper(plr, 'Updated color');
-
       this.omegga.writeln(`Chat.Command /GrantRole "${toColor}" "${plr.name}"`);
+
+      this.omegga.whisper(plr, `Updated your role color to <color="${this.roleColors[toColor]}">${toColor}</>!`);
     });
 
     this.omegga.on('cmd:namecolors', (speaker: string) => {
