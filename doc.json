@@ -1,0 +1,13 @@
+{
+  "name": "colorful-chat",
+  "description": "A typed safe Omegga plugin.",
+  "author": "astrsk",
+  "config": {
+    "cooldown": {
+      "description": "Cooldown between command runs in seconds to prevent role spam.",
+      "default": "10",
+      "type": "number"
+    }
+  },
+  "commands": []
+}

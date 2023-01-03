@@ -1,0 +1,4 @@
+Populate this file with the names of your color roles, separated by a new line, case insensitive. This first line is ignored.
+green
+blue
+red
