@@ -148,6 +148,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         const formatted = `<color="${this.roleColors[role]}">${role}</>${i >= this.roleNames.length ? '' : ', '}`
 
         if ((current + formatted).length > 512) {
+          current = current.replace(/, $/, '');
           output.push(current);
           current = '';
         }
