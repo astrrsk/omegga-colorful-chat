@@ -111,6 +111,11 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         return;
       }
 
+      if (!this.roleNames.includes(toColor)) {
+        this.omegga.whisper(speaker, 'That role cannot be assigned.');
+        return;
+      }
+
       cooldowns[speaker] = Date.now();
 
       const plr = this.omegga.getPlayer(speaker);
