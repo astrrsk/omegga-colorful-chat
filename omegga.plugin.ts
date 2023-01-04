@@ -148,7 +148,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         const formatted = `<color="${this.roleColors[role]}">${role}</>${i >= this.roleNames.length - 1 ? '' : ', '}`
         const utf8Bytes = Buffer.byteLength(current + formatted, 'utf-8');
 
-        if (utf8Bytes > 512) {
+        if (utf8Bytes > 400) {
           current = current.replace(/, $/, '');
           output.push(current);
           current = '';
@@ -157,7 +157,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       });
       output.push(current);
 
-      output.filter((o) => Buffer.byteLength(o) <= 512).forEach((s) => {
+      output.filter((o) => Buffer.byteLength(o) <= 400).forEach((s) => {
         this.omegga.whisper(speaker, s);
       })
     });
