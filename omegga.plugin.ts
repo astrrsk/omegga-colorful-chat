@@ -1,11 +1,12 @@
 import OmeggaPlugin, { OL, PS, PC, OmeggaPlayer } from 'omegga';
 import fs from 'fs';
+import path from 'path';
 
 type Config = { cooldown: number };
 type Storage = { bar: string };
 
 // Path for roles.txt
-const FILE_PATH = __dirname + '/../roles.txt';
+const FILE_PATH = path.join(__dirname, '../roles.txt');
 
 let cooldowns = {}
 
