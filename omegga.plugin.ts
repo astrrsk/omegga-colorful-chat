@@ -64,7 +64,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     });
     output.push(current);
 
-    output.filter((o) => Buffer.byteLength(o) <= 400).forEach((s) => {
+    output.filter((o) => Buffer.byteLength(o, 'utf-8') <= 400).forEach((s) => {
       this.formattedRoleColors.push(s);
     })
   }
@@ -81,6 +81,8 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       console.warn('role.txt contains no roles!');
       return;
     }
+
+    if (this.roleNames[this.roleNames.length - 1] === '\n') this.roleNames.splice(this.roleNames.length - 1, 1);
 
     const allRoles = this.omegga.getRoleSetup();
     let nonColorRoles = [];
