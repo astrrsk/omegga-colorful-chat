@@ -37,6 +37,8 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   private roleNames = [];
   private roleColors = {};
 
+  private formattedRoleColors: string[] = [];
+
   // Check a player's roles to see if they already have a color
   async checkRoles(plr: OmeggaPlayer): Promise<string[]> {
     const playerRoles = plr.getRoles();
@@ -44,6 +46,27 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     const match = this.roleNames.filter(v => playerRoles.includes(v));
 
     return match;
+  }
+
+  private formatRoleColors() {
+    let output: string[] = [];
+    let current: string = '';
+    this.roleNames.forEach((role, i) => {
+      const formatted = `<color="${this.roleColors[role]}">${role}</>${i >= this.roleNames.length - 1 ? '' : ', '}`
+      const utf8Bytes = Buffer.byteLength(current + formatted, 'utf-8');
+
+      if (utf8Bytes > 400) {
+        current = current.replace(/, $/, '');
+        output.push(current);
+        current = '';
+      }
+      current += formatted;
+    });
+    output.push(current);
+
+    output.filter((o) => Buffer.byteLength(o) <= 400).forEach((s) => {
+      this.formattedRoleColors.push(s);
+    })
   }
 
   async init() {
@@ -84,6 +107,8 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       return;
     }
 
+    // Premake the formatted role colors array
+    this.formatRoleColors();
 
     // Join and leave methods
     this.omegga.on('join', async (player) => {
@@ -92,7 +117,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         const plr = this.omegga.getPlayer(player.name)
         if ((await this.checkRoles(plr)).length <= 0) {
           this.omegga.whisper(plr, 'You have been assigned a random colored role!');
-          this.omegga.whisper(plr, 'Use <code>/namecolors</> to see all available colors, and <code>/chagecolor [color]</> to change it.');
+          this.omegga.whisper(plr, 'Use <code>/namecolors</> to see all available colors, and <code>/changecolor {color}</> to change it.');
           const max = this.roleNames.length;
           const R = getRandomInt(0, max - 1);
 
@@ -142,25 +167,10 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     });
 
     this.omegga.on('cmd:namecolors', (speaker: string) => {
-      this.omegga.whisper(speaker, 'Current color roles:');
-      let output: string[] = [];
-      let current: string = '';
-      this.roleNames.forEach((role, i) => {
-        const formatted = `<color="${this.roleColors[role]}">${role}</>${i >= this.roleNames.length - 1 ? '' : ', '}`
-        const utf8Bytes = Buffer.byteLength(current + formatted, 'utf-8');
-
-        if (utf8Bytes > 400) {
-          current = current.replace(/, $/, '');
-          output.push(current);
-          current = '';
-        }
-        current += formatted;
-      });
-      output.push(current);
-
-      output.filter((o) => Buffer.byteLength(o) <= 400).forEach((s) => {
+      this.omegga.whisper(speaker, 'Current name colors, select one using <code>/changecolor {color}</>!');
+      this.formattedRoleColors.forEach((s) => {
         this.omegga.whisper(speaker, s);
-      })
+      });
     });
 
     return { registeredCommands: ['changecolor', 'namecolors'] };
