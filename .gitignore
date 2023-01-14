@@ -3,4 +3,4 @@ node_modules/
 omegga.d.ts
 disabled.omegga
 package-lock.json
-roles.txt
+roles*.txt
