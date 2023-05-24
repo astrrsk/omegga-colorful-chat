@@ -143,6 +143,8 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         return;
       }
 
+      if (!toColor) { return; }
+
       if (nonColorRoles.includes(toColor.toLowerCase())) {
         this.omegga.whisper(speaker, '<color="ff0000">That role cannot be assigned. <emoji>contempt</>');
         return;
