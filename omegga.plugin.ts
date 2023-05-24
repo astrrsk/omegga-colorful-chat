@@ -171,6 +171,9 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     });
 
     this.omegga.on('cmd:namecolors', (speaker: string) => {
+      const plr = this.omegga.getPlayer(speaker);
+      if (!plr.isHost()) return;
+
       this.omegga.whisper(speaker, 'Current name colors, select one using <code>/changecolor {color}</>!');
       this.formattedRoleColors.forEach((s) => {
         this.omegga.whisper(speaker, s);
