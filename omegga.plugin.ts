@@ -116,8 +116,8 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     this.omegga.on('join', async (player) => {
       // Delay is used to wait for the OmeggaPlayer with the proper methods needed to appear on the server
       setTimeout(async () => {
-        const plr = this.omegga.getPlayer(player.name)
-        if ((await this.checkRoles(plr)).length <= 0) {
+        const plr = this.omegga.getPlayer(player.name);
+        if (plr && (await this.checkRoles(plr)).length <= 0) {
           this.omegga.whisper(plr, 'You have been assigned a random colored role!');
           this.omegga.whisper(plr, 'Use <code>/namecolors</> to see all available colors, and <code>/changecolor {color}</> to change it.');
           const max = this.roleNames.length;
